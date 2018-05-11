@@ -15,11 +15,13 @@ sys.path.insert(0, '../ext/APA102_Pi')
 import apa102
 import time
 import threading
-
+from grid import grid
 
 # global variables
 PIXEL_COUNT = 656
 frame_delay = 0.05 # delay between calls to draw_screen
+max_brightness = 1
+
 
 # locks
 spi_lock = threading.Lock()
@@ -36,11 +38,14 @@ def draw_screen():
 
 panel = apa102.APA102(
 	num_led=PIXEL_COUNT,
-	global_brightness=5,
+	global_brightness=max_brightness,
 	mosi=10,
 	sclk=11,
 	order='rbg')
 	#max_speed_hz=1000000)
+
+grid = grid()
+print(grid.grid[:, :, 3])
 
 panel.clear_strip()
 panel.show()
