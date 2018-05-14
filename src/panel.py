@@ -11,11 +11,13 @@
 """
 
 import sys
+import random
 sys.path.insert(0, '../ext/APA102_Pi')
 import apa102
 import time
 import threading
 from grid import grid
+from pulses import pulse_list
 import RPi.GPIO as GPIO
 import Adafruit_Trellis
 
@@ -40,9 +42,11 @@ panel = apa102.APA102(
 	order='rbg')
 	#max_speed_hz=1000000)
 
+# pulse representation
+pulse_list = pulse_list()
+
 # internal representation of grid data
 grid = grid()
-print(grid.grid[:, :, 3])
 
 # I2C interface to trellis keypads
 matrix0 = Adafruit_Trellis.Adafruit_Trellis()
@@ -58,9 +62,10 @@ keypad.begin((0x70, I2C_BUS))
 def draw_screen():
 	
 	# move pulses
-	
+	pulse_list.move_pulses()	
 
 	# update pixel array values
+	
 
 	# redraw screen
 	with spi_lock:
@@ -84,7 +89,6 @@ def main():
 	for i in range(PIXEL_COUNT):
 		panel.set_pixel_rgb(i, panel.wheel((i*10) % 255))
 		# TODO: alter wheel function to use modulo 255
-		#panel.set_pixel_rgb(i, 0x00FF00)
 	
 	draw_screen.loop_count = 0
 	
@@ -98,8 +102,9 @@ def main():
 				for i in range(numKeys):
 					if keypad.justPressed(i):
 						print('v{0}'.format(i))
-						
-	
+						panel.rotate(positions=5) # for testing...
+						pulse_list.add_pulse(1, 2, panel.wheel(random.randint(0, 10)*10 % 255))	
+
 	except KeyboardInterrupt:
 		print(" KB Int")
 	
