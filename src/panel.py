@@ -24,7 +24,7 @@ import Adafruit_Trellis
 # global variables
 PIXEL_COUNT = 656
 frame_delay = 0.05 # delay between calls to draw_screen
-max_brightness = 1
+max_brightness = 5
 
 
 # locks - acquire in this order!
@@ -39,8 +39,8 @@ panel = apa102.APA102(
 	global_brightness=max_brightness,
 	mosi=10,
 	sclk=11,
-	order='rbg')
-	#max_speed_hz=1000000)
+	order='rbg',
+	max_speed_hz=1000000)
 
 # pulse representation
 pulse_list = pulse_list()
@@ -59,11 +59,11 @@ keypad.begin((0x70, I2C_BUS))
 
 
 
-def draw_screen(panel, pulse_list, grid):
+def draw_screen(panel, pulse_list, grid, pulse_lock, grid_lock, panel_lock, spi_lock):
 
 	# move pulses
-#	with pulse_lock:
-#		pulse_list.move_pulses(grid)	
+	with pulse_lock:
+		pulse_list.move_pulses(grid)	
 
 	# update grid information
 	with pulse_lock:
@@ -71,9 +71,9 @@ def draw_screen(panel, pulse_list, grid):
 			grid.update_color_state(pulse_list)
 
 	# update pixel array values
-#	with grid_lock:
-#		with panel_lock:
-#			grid.update_color_array(panel)
+	with grid_lock:
+		with panel_lock:
+			grid.update_color_array(panel)
 
 	# redraw screen
 	with panel_lock:
@@ -81,7 +81,8 @@ def draw_screen(panel, pulse_list, grid):
 			panel.show()
 
 	# re-arm frame timer
-	t = threading.Timer(frame_delay, draw_screen, args=[panel, pulse_list, grid])
+	t = threading.Timer(frame_delay, draw_screen, args=[panel, pulse_list, grid, \
+		pulse_lock, grid_lock, panel_lock, spi_lock])
 	t.start()
 
 
@@ -89,15 +90,21 @@ def draw_screen(panel, pulse_list, grid):
 
 def main():
 
+	y = [2, 5, 8, 11, 14, 16, 19, 22, 25, 2, 5, 8, 11, 14, 16, 19, 22, 25]
+	x = [9, 7, 5, 3, 3, 5, 7, 9, 23, 25, 27, 29, 29, 27, 25, 23]
+
 	with panel_lock:
 		panel.clear_strip()
 		panel.show()	
 		for i in range(PIXEL_COUNT):
-			panel.set_pixel_rgb(i, panel.wheel((i*10) % 255))
+			panel.set_pixel_rgb(i, 0xF0F0F0)
+			#panel.set_pixel_rgb(i, panel.wheel((i*10) % 255))
 			# TODO: alter wheel function to use modulo 255
+
+		panel.show()
 	
-	
-	t = threading.Timer(frame_delay, draw_screen, args=[panel, pulse_list, grid])
+	t = threading.Timer(frame_delay, draw_screen, args=[panel, pulse_list, grid, \
+		pulse_lock, grid_lock, panel_lock, spi_lock])
 	t.start()
 	
 	try:
@@ -107,9 +114,8 @@ def main():
 				for i in range(numKeys):
 					if keypad.justPressed(i):
 						print('v{0}'.format(i))
-						panel.rotate(positions=5) # for testing...
 						with pulse_lock:
-							pulse_list.add_pulse(1, 2, panel.wheel(random.randint(0, 10)*10 % 255))	
+							pulse_list.add_pulse(x[i], y[i], panel.wheel(random.randint(0, 10)*10 % 255))	
 
 	except KeyboardInterrupt:
 		print(" KB Int")

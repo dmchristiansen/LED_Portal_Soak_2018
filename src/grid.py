@@ -24,13 +24,14 @@ class grid:
 
 
 	
-	def __init__(self):
+	def __init__(self, background=0x0F0F0F):
 
 		# (row, column, pixel info)
 		# pixel info = [current color, target color, pixel type, array index]
 		# pixel type: 0-> invalid, 1->valid
 		# array index: 0+ are valid indices, -1 means invalid
 		self.grid = np.zeros((28, 32, 4), dtype=int)
+		self.background = background
 
 		# fill in self.grid borders
 		self.grid[0, np.r_[0:9, 23:32]] = [0, 0, 0, -1] # 16	
@@ -92,6 +93,11 @@ class grid:
 		self.grid[26, 8:24, 3] = np.arange(624, 640, dtype=int)
 		self.grid[27, 8:24, 3] = np.arange(640, 656, dtype=int)
 
+		# set background color
+		for r in range(self.grid.shape[0]):
+			for c in range(self.grid.shape[1]):
+				self.grid[r, c, 0:1] = self.background
+
 	def update_color_state(self, pulse_list):
 		"""
 		Updates current color values based on pulse location and previous colors
@@ -106,7 +112,7 @@ class grid:
 					# this needs to fade colors...
 				
 		for pulse in pulse_list.list:
-			self.grid[pulse.px, pulse.py, 0] = pulse.color
+			self.grid[pulse.py, pulse.px, 0] = pulse.color
 
 	def update_color_array(self, panel):
 		"""
@@ -116,8 +122,7 @@ class grid:
 		for r in range(self.grid.shape[0]):
 			for c in range(self.grid.shape[1]):
 				if self.grid[r, c, 3] != -1:
-					panel.set_pixel_rgb(self.grid[r, c, 3], self.grid[r, c, 0])
-
+					panel.set_pixel_rgb(self.grid[r, c, 3], int(self.grid[r, c, 0] & 0xFFFFFF))
 
 
  

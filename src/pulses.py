@@ -15,12 +15,12 @@ class pulse:
 		self.vx = vx
 		self.vy = vy
 		
-		self.color = color
+		self.color = (color & 0xFFFFFF)
 		self.life = life
 
 	def __str__(self):
 		return ("px=" + str(self.px) + " py=" + str(self.py) + " vx=" + str(self.vx) +\
-		 	" vy=" + str(self.vy) + " life=" + str(self.life))
+		 	" vy=" + str(self.vy) + " life=" + str(self.life) + " color=" + hex(self.color))
 
 	def __repr__(self):
 		return self.__str__()
@@ -68,15 +68,18 @@ class pulse_list:
 			# check for boundary conditions
 			# if pulse is out of boundaries of the matrix...
 			if (pulse.px >= xmax) or (pulse.px < 0) or (pulse.py >= ymax) or (pulse.py < 0):
+				print("removing, matrix bounds: ", pulse)
 				self.list.remove(pulse)
 				
 			# if pulse is out of bounds of the hexagon...
-			if grid.grid[pulse.py, pulse.px, 3] == -1:
+			elif grid.grid[pulse.py, pulse.px, 3] == -1:
+				print("removing, hexagon bounds: ", pulse)
 				self.list.remove(pulse)
 	
-			if pulse.life == 0:
+			elif pulse.life == 0:
+				print("removing, life: ", pulse)
 				self.list.remove(pulse)
 		
-		#print(len(self.list))
+		print(self.list)
 
 
