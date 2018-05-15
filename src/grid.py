@@ -107,7 +107,6 @@ class grid:
 				
 		for pulse in pulse_list.list:
 			self.grid[pulse.px, pulse.py, 0] = pulse.color
-			print("color: ", pulse.color)
 
 	def update_color_array(self, panel):
 		"""

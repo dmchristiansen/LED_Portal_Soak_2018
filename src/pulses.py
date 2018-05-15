@@ -18,6 +18,13 @@ class pulse:
 		self.color = color
 		self.life = life
 
+	def __str__(self):
+		return ("px=" + str(self.px) + " py=" + str(self.py) + " vx=" + str(self.vx) +\
+		 	" vy=" + str(self.vy) + " life=" + str(self.life))
+
+	def __repr__(self):
+		return self.__str__()
+
 class pulse_list:
 	"""
 	Class tracks pulses of light that move around the grid
@@ -31,17 +38,18 @@ class pulse_list:
 
 
 	def __init__(self, pulse_life=10):
-		self.list = np.empty((0, 1), dtype=pulse)
+		self.list = []
 		self.pulse_life=pulse_life
+		self.pulse_count = 0
 
 	def add_pulse(self, x, y, color):
 
-		new_pulse = pulse(x, y, \
+		self.list.append(pulse(x, y, \
 					np.random.randint(0, 3), np.random.randint(0, 3), \
-					color, self.pulse_life)
+					color, self.pulse_life))
 
-		self.list = np.append(self.list, new_pulse)
-
+		self.pulse_count += 1
+		print(self.list)
 
 	def move_pulses(self, grid):
 		# bounds of grid
@@ -57,20 +65,18 @@ class pulse_list:
 			pulse.px += pulse.vx
 			pulse.py += pulse.vy
 
-		for pulse in self.list:
 			# check for boundary conditions
 			# if pulse is out of boundaries of the matrix...
 			if (pulse.px >= xmax) or (pulse.px < 0) or (pulse.py >= ymax) or (pulse.py < 0):
-				pulse.life = 0
+				self.list.remove(pulse)
+				
 			# if pulse is out of bounds of the hexagon...
-			if grid.grid[pulse.px, pulse.py, 3] == -1:
-				pulse.life = 0 
+			if grid.grid[pulse.py, pulse.px, 3] == -1:
+				self.list.remove(pulse)
 	
-		# clean pulse list
-		for i in range(self.list.shape[0]):
-			if self.list[i].life == 0:
-				self.list = np.delete(self.list, i)
-
-
+			if pulse.life == 0:
+				self.list.remove(pulse)
+		
+		#print(len(self.list))
 
 

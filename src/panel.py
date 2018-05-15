@@ -59,11 +59,11 @@ keypad.begin((0x70, I2C_BUS))
 
 
 
-def draw_screen():
-	
+def draw_screen(panel, pulse_list, grid):
+
 	# move pulses
-	with pulse_lock:
-		pulse_list.move_pulses(grid)	
+#	with pulse_lock:
+#		pulse_list.move_pulses(grid)	
 
 	# update grid information
 	with pulse_lock:
@@ -81,7 +81,7 @@ def draw_screen():
 			panel.show()
 
 	# re-arm frame timer
-	t = threading.Timer(frame_delay, draw_screen)
+	t = threading.Timer(frame_delay, draw_screen, args=[panel, pulse_list, grid])
 	t.start()
 
 
@@ -97,7 +97,7 @@ def main():
 			# TODO: alter wheel function to use modulo 255
 	
 	
-	t = threading.Timer(frame_delay, draw_screen)
+	t = threading.Timer(frame_delay, draw_screen, args=[panel, pulse_list, grid])
 	t.start()
 	
 	try:
@@ -108,7 +108,8 @@ def main():
 					if keypad.justPressed(i):
 						print('v{0}'.format(i))
 						panel.rotate(positions=5) # for testing...
-						pulse_list.add_pulse(1, 2, panel.wheel(random.randint(0, 10)*10 % 255))	
+						with pulse_lock:
+							pulse_list.add_pulse(1, 2, panel.wheel(random.randint(0, 10)*10 % 255))	
 
 	except KeyboardInterrupt:
 		print(" KB Int")
