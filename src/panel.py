@@ -27,11 +27,11 @@ frame_delay = 0.05 # delay between calls to draw_screen
 max_brightness = 1
 
 
-# locks
-spi_lock = threading.Lock()
+# locks - acquire in this order!
 pulse_lock = threading.Lock()
 grid_lock = threading.Lock()
 panel_lock = threading.Lock()
+spi_lock = threading.Lock()
 
 # define led array object (actually sk9822 leds)
 panel = apa102.APA102(
@@ -62,16 +62,23 @@ keypad.begin((0x70, I2C_BUS))
 def draw_screen():
 	
 	# move pulses
-	pulse_list.move_pulses()	
+	with pulse_lock:
+		pulse_list.move_pulses(grid)	
+
+	# update grid information
+	with pulse_lock:
+		with grid_lock:
+			grid.update_color_state(pulse_list)
 
 	# update pixel array values
-	
+#	with grid_lock:
+#		with panel_lock:
+#			grid.update_color_array(panel)
 
 	# redraw screen
-	with spi_lock:
-		
-		panel.rotate(positions=1)
-		panel.show()
+	with panel_lock:
+		with spi_lock:	
+			panel.show()
 
 	# re-arm frame timer
 	t = threading.Timer(frame_delay, draw_screen)
@@ -82,15 +89,13 @@ def draw_screen():
 
 def main():
 
-	panel.clear_strip()
-	panel.show()
+	with panel_lock:
+		panel.clear_strip()
+		panel.show()	
+		for i in range(PIXEL_COUNT):
+			panel.set_pixel_rgb(i, panel.wheel((i*10) % 255))
+			# TODO: alter wheel function to use modulo 255
 	
-	
-	for i in range(PIXEL_COUNT):
-		panel.set_pixel_rgb(i, panel.wheel((i*10) % 255))
-		# TODO: alter wheel function to use modulo 255
-	
-	draw_screen.loop_count = 0
 	
 	t = threading.Timer(frame_delay, draw_screen)
 	t.start()

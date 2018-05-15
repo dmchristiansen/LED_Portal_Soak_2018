@@ -92,3 +92,33 @@ class grid:
 		self.grid[26, 8:24, 3] = np.arange(624, 640, dtype=int)
 		self.grid[27, 8:24, 3] = np.arange(640, 656, dtype=int)
 
+	def update_color_state(self, pulse_list):
+		"""
+		Updates current color values based on pulse location and previous colors
+		Fades between current color and target color
+		Sets current color based ob pulse location
+		"""
+		
+		for r in range(self.grid.shape[0]):
+			for c in range(self.grid.shape[1]):
+				if self.grid[r, c, 3] != -1:
+					pass
+					# this needs to fade colors...
+				
+		for pulse in pulse_list.list:
+			self.grid[pulse.px, pulse.py, 0] = pulse.color
+			print("color: ", pulse.color)
+
+	def update_color_array(self, panel):
+		"""
+		Updates strip color values based on grid state
+		"""
+		
+		for r in range(self.grid.shape[0]):
+			for c in range(self.grid.shape[1]):
+				if self.grid[r, c, 3] != -1:
+					panel.set_pixel_rgb(self.grid[r, c, 3], self.grid[r, c, 0])
+
+
+
+ 
