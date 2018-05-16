@@ -7,7 +7,7 @@ import numpy as np
 import random
 
 class pulse:
-	def __init__(self, px, py, vx, vy, color, life):
+	def __init__(self, px, py, vx, vy, r, g, b, life):
 		# position
 		self.px = px 
 		self.py = py
@@ -15,12 +15,15 @@ class pulse:
 		self.vx = vx
 		self.vy = vy
 		
-		self.color = (color & 0xFFFFFF)
+		self.r = r
+		self.g = g
+		self.b = b
 		self.life = life
 
 	def __str__(self):
 		return ("px=" + str(self.px) + " py=" + str(self.py) + " vx=" + str(self.vx) +\
-		 	" vy=" + str(self.vy) + " life=" + str(self.life) + " color=" + hex(self.color))
+		 	" vy=" + str(self.vy) + " life=" + str(self.life))
+			 #\+ " color=" + hex(int(self.r << 16 + self.g << 8 + self.b)))
 
 	def __repr__(self):
 		return self.__str__()
@@ -32,7 +35,7 @@ class pulse_list:
 	Each object  tracks:
 		position (x, y)
 		velocity (x, y)
-		color
+		r, g, b
 		lifespan (maybe?)
 	"""
 
@@ -42,11 +45,9 @@ class pulse_list:
 		self.pulse_life=pulse_life
 		self.pulse_count = 0
 
-	def add_pulse(self, x, y, color):
+	def add_pulse(self, px, py, vx, vy, r, g, b):
 
-		self.list.append(pulse(x, y, \
-					np.random.randint(0, 3), np.random.randint(0, 3), \
-					color, self.pulse_life))
+		self.list.append(pulse(px, py, vx, vy, r, g, b, self.pulse_life))
 
 		self.pulse_count += 1
 		print(self.list)
@@ -72,7 +73,7 @@ class pulse_list:
 				self.list.remove(pulse)
 				
 			# if pulse is out of bounds of the hexagon...
-			elif grid.grid[pulse.py, pulse.px, 3] == -1:
+			elif grid.grid[pulse.py, pulse.px, grid.index] == -1:
 				print("removing, hexagon bounds: ", pulse)
 				self.list.remove(pulse)
 	

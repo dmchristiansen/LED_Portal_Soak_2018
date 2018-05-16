@@ -20,10 +20,11 @@ from grid import grid
 from pulses import pulse_list
 import RPi.GPIO as GPIO
 import Adafruit_Trellis
+import numpy as np
 
 # global variables
 PIXEL_COUNT = 656
-frame_delay = 0.05 # delay between calls to draw_screen
+frame_delay = 0.01 # delay between calls to draw_screen
 max_brightness = 5
 
 
@@ -40,7 +41,7 @@ panel = apa102.APA102(
 	mosi=10,
 	sclk=11,
 	order='rbg',
-	max_speed_hz=1000000)
+	max_speed_hz=8000000)
 
 # pulse representation
 pulse_list = pulse_list()
@@ -90,8 +91,16 @@ def draw_screen(panel, pulse_list, grid, pulse_lock, grid_lock, panel_lock, spi_
 
 def main():
 
-	y = [2, 5, 8, 11, 14, 16, 19, 22, 25, 2, 5, 8, 11, 14, 16, 19, 22, 25]
-	x = [9, 7, 5, 3, 3, 5, 7, 9, 23, 25, 27, 29, 29, 27, 25, 23]
+	# values for pulse initialization
+	# each button's number is the index into the arrays to get it's data
+	#y = [2, 5, 8, 11, 14, 16, 19, 22, 25, 2, 5, 8, 11, 14, 16, 19, 22, 25]
+	#x = [9, 7, 5, 3, 3, 5, 7, 9, 23, 25, 27, 29, 29, 27, 25, 23]
+	px = [8, 7, 6, 6, 5, 4, 4, 3, 3, 4, 4, 5, 6, 6, 7, 8]
+	py = [3, 4, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21, 22, 23, 24]
+	vxmin = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+	vxmax = [4, 4, 4, 4, 4, 4, 4, 4 ,4, 4, 4, 4, 4, 4, 4, 4]
+	vymin = [0, 0, 0, 0, 0, 0, 0, 0, -3, -3, -3, -3, -3, -3, -3, -3]
+	vymax = [3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0] 
 
 	with panel_lock:
 		panel.clear_strip()
@@ -115,7 +124,10 @@ def main():
 					if keypad.justPressed(i):
 						print('v{0}'.format(i))
 						with pulse_lock:
-							pulse_list.add_pulse(x[i], y[i], panel.wheel(random.randint(0, 10)*10 % 255))	
+							pulse_list.add_pulse(px[i], py[i],\
+								np.random.randint(vxmin[i], vxmax[i]),\
+								np.random.randint(vymin[i], vymax[i]),\
+								(i * 15), (255 - (i * 15)), ((i % 4) * 20))	
 
 	except KeyboardInterrupt:
 		print(" KB Int")
