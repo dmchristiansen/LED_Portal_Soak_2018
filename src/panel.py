@@ -25,7 +25,7 @@ import numpy as np
 # global variables
 PIXEL_COUNT = 656
 frame_delay = 0.01 # delay between calls to draw_screen
-max_brightness = 5
+max_brightness = 15
 
 
 # locks - acquire in this order!
@@ -41,13 +41,13 @@ panel = apa102.APA102(
 	mosi=10,
 	sclk=11,
 	order='rbg',
-	max_speed_hz=8000000)
+	max_speed_hz=4000000)
 
 # pulse representation
 pulse_list = pulse_list()
 
 # internal representation of grid data
-grid = grid()
+grid = grid(0x0A, 0x0A, 0x0A)
 
 # I2C interface to trellis keypads
 matrix0 = Adafruit_Trellis.Adafruit_Trellis()
@@ -106,7 +106,7 @@ def main():
 		panel.clear_strip()
 		panel.show()	
 		for i in range(PIXEL_COUNT):
-			panel.set_pixel_rgb(i, 0xF0F0F0)
+			panel.set_pixel_rgb(i, 0xFFF0F0)
 			#panel.set_pixel_rgb(i, panel.wheel((i*10) % 255))
 			# TODO: alter wheel function to use modulo 255
 

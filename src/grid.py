@@ -24,7 +24,7 @@ class grid:
 
 
 	
-	def __init__(self, background=0x0F0F0F):
+	def __init__(self, br, bg, bb):
 
 		# grid data indices
 		self.cr    = 0
@@ -41,7 +41,9 @@ class grid:
 		# pixel type: 0-> invalid, 1->valid
 		# array index: 0+ are valid indices, -1 means invalid
 		self.grid = np.zeros((28, 32, 8), dtype=int)
-		self.background = background
+		self.background_r = br
+		self.background_g = bg
+		self.background_b = bb
 
 		# fill in self.grid borders
 		self.grid[0, np.r_[0:9, 23:32]] = [0, 0, 0, 0, 0, 0, 0, -1] # 16	
@@ -106,9 +108,9 @@ class grid:
 		# set background color
 		for r in range(self.grid.shape[0]):
 			for c in range(self.grid.shape[1]):
-				self.grid[r, c, self.tr] = (self.background & 0xFF0000 >> 16) 
-				self.grid[r, c, self.tg] = (self.background & 0x00FF00 >> 8)
-				self.grid[r, c, self.tb] = (self.background & 0x0000FF)
+				self.grid[r, c, self.tr] = self.background_r 
+				self.grid[r, c, self.tg] = self.background_g
+				self.grid[r, c, self.tb] = self.background_b
 
 	def interpolate(self, current, target):
 		fade_val = 10
