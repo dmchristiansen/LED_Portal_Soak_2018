@@ -24,8 +24,8 @@ import numpy as np
 
 # global variables
 PIXEL_COUNT = 656
-frame_delay = 0.01 # delay between calls to draw_screen
-max_brightness = 15
+frame_delay = 0.025 # delay between calls to draw_screen
+max_brightness = 25
 
 
 # locks - acquire in this order!
@@ -47,7 +47,7 @@ panel = apa102.APA102(
 pulse_list = pulse_list()
 
 # internal representation of grid data
-grid = grid(0x0A, 0x0A, 0x0A)
+grid = grid(0x08, 0x08, 0x08)
 
 # I2C interface to trellis keypads
 matrix0 = Adafruit_Trellis.Adafruit_Trellis()
