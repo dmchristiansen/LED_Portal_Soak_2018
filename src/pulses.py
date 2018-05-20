@@ -96,7 +96,16 @@ class pulse_list:
 				if pulse.life > 0:	
 					pulse.px -= pulse.vx
 					pulse.py -= pulse.vy
-					pulse.vx, pulse.vy = (-1 * pulse.vy), (-1 * pulse.vx)
+					vx, vy = pulse.vx, pulse.vy
+					if vx < 0:
+						pulse.vx = abs(vy)
+					else:
+						pulse.vx = -1 * abs(vy)
+					if vy < 0:
+						pulse.vy = abs(vx)
+					else:
+						pulse.vy = -1 * abs(vx)
+					pulse.life -= 1
 				else:
 					print("removing, matrix bounds: ", pulse)
 					self.list.remove(pulse)
@@ -107,7 +116,15 @@ class pulse_list:
 				if pulse.life > 0:	
 					pulse.px -= pulse.vx
 					pulse.py -= pulse.vy
-					pulse.vx, pulse.vy = (-1 * pulse.vy), (-1 * pulse.vx)
+					vx, vy = pulse.vx, pulse.vy
+					if vx < 0:
+						pulse.vx = abs(vy)
+					else:
+						pulse.vx = -1 * abs(vy)
+					if vy < 0:
+						pulse.vy = abs(vx)
+					else:
+						pulse.vy = -1 * abs(vx)
 					pulse.life -= 1
 				else:
 					print("removing, hexagon bounds: ", pulse)
