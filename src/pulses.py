@@ -7,6 +7,8 @@ import numpy as np
 import random
 import math
 import itertools
+import sys
+from pygame import mixer
 
 class pulse:
 	def __init__(self, px, py, vx, vy, r, g, b, life):
@@ -48,9 +50,16 @@ class pulse_list:
 		self.pulse_life=pulse_life
 		self.pulse_count = 0
 
-	def add_pulse(self, px, py, vx, vy, r, g, b):
+		#mixer.pre_init(44100, 16, 2, 4096)
+		#pygame.init()
+		mixer.init()
+		self.sound = mixer.Sound(file='test.wav')
 
-		self.list.append(pulse(px, py, vx, vy, r, g, b, self.pulse_life))
+	def add_pulse(self, px, py, vx, vy, r, g, b, life=0):
+		if life == 0:
+			life = self.pulse_life
+
+		self.list.append(pulse(px, py, vx, vy, r, g, b, life))
 
 		self.pulse_count += 1
 		print(self.list)
@@ -62,7 +71,7 @@ class pulse_list:
 
 		# check for collisions
 		for pulse_1, pulse_2 in itertools.combinations(self.list, 2):
-			if (((abs(pulse_1.px - pulse_2.px) < 2) or (abs(pulse_1.py - pulse_2.py) < 2)) and\
+			if (((abs(pulse_1.px - pulse_2.px) < 1) or (abs(pulse_1.py - pulse_2.py) < 1)) and\
 				(pulse_1.age > 1) and (pulse_2.age > 1) and\
 				(((pulse_1.vx > 0) and (pulse_2.vx < 0)) or\
 				((pulse_1.vx < 0) and (pulse_2.vx > 0)) or\
@@ -70,15 +79,29 @@ class pulse_list:
 				((pulse_1.vy < 0) and (pulse_2.vy > 0)))):
 				for i in range(0, math.floor((pulse_1.life + pulse_2.life) / 3)):
 					if (i // 2) == 0:
+						#self.add_pulse(pulse_1.px, pulse_1.py,\
+						#	np.random.randint(-3, 4), np.random.randint(-3, 4),\
+						#	np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255))
 						self.add_pulse(pulse_1.px, pulse_1.py,\
 							np.random.randint(-3, 4), np.random.randint(-3, 4),\
-							np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255))
+							math.floor((pulse_1.r + pulse_2.r)/2),\
+							math.floor((pulse_1.g + pulse_2.g)/2),\
+							math.floor((pulse_1.b + pulse_2.b)/2),\
+							life=1)
+						self.pulse_count += 1
 					else:
-						self.add_pulse(pulse_2.px, pulse_2.py,\
+						#self.add_pulse(pulse_2.px, pulse_2.py,\
+						#	np.random.randint(-3, 4), np.random.randint(-3, 4),\
+						#	np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255))
+						self.add_pulse(pulse_1.px, pulse_1.py,\
 							np.random.randint(-3, 4), np.random.randint(-3, 4),\
-							np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 255))
+							math.floor((pulse_1.r + pulse_2.r)/2),\
+							math.floor((pulse_1.g + pulse_2.g)/2),\
+							math.floor((pulse_1.b + pulse_2.b)/2),\
+							life=1)
+						self.pulse_count += 1
 									
-				
+				self.sound.play()
 				pulse_1.life = 0
 				pulse_2.life = 0
 
@@ -133,6 +156,11 @@ class pulse_list:
 	
 			elif pulse.life == 0:
 				print("removing, life: ", pulse)
+				self.list.remove(pulse)
+				self.pulse_count -= 1
+
+			elif pulse.age == 100:
+				print("removing, age: ", pulse)
 				self.list.remove(pulse)
 				self.pulse_count -= 1
 		

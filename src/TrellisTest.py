@@ -30,21 +30,21 @@ LATCHING = 1
 MODE = LATCHING
 
 matrix0 = Adafruit_Trellis.Adafruit_Trellis()
+matrix1 = Adafruit_Trellis.Adafruit_Trellis()
 
 # uncomment the below to add 3 more matrices
 #
-# matrix1 = Adafruit_Trellis()
 # matrix2 = Adafruit_Trellis()
 # matrix3 = Adafruit_Trellis()
 # you can add more matrices (up to 8 per I2C bus)
 
 # Just one
-trellis = Adafruit_Trellis.Adafruit_TrellisSet(matrix0)
+trellis = Adafruit_Trellis.Adafruit_TrellisSet(matrix0, matrix1)
 # or use the below to select 4, up to 8 per I2C bus can be passed in
 # trellis = Adafruit_Trellis.Adafruit_TrellisSet(matrix0, matrix1, matrix2, matrix3)
 
 # set to however many you're working with here, up to 8 per I2C bus
-NUMTRELLIS = 1
+NUMTRELLIS = 2
 
 numKeys = NUMTRELLIS * 16
 
@@ -66,7 +66,7 @@ print('Trellis Demo')
 
 # begin() with the I2C addresses and bus numbers of each panel in order
 # I find it easiest if the addresses are in order
-trellis.begin((0x70, I2C_BUS))   # only one
+trellis.begin((0x70, I2C_BUS), (0x71, I2C_BUS))   # only one
 # trellis.begin((0x70,  I2C_BUS), (0x71, I2C_BUS), (0x72, I2C_BUS), (0x73, I2C_BUS))  # or four!
 
 # light up all the LEDs in order

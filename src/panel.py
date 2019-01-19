@@ -25,7 +25,7 @@ import numpy as np
 # global variables
 PIXEL_COUNT = 656
 frame_delay = 0.025 # delay between calls to draw_screen
-max_brightness = 25
+max_brightness = 31
 
 
 # locks - acquire in this order!
@@ -47,16 +47,17 @@ panel = apa102.APA102(
 pulse_list = pulse_list()
 
 # internal representation of grid data
-grid = grid(0x08, 0x08, 0x08)
+grid = grid(0x04, 0x04, 0x04)
 
 # I2C interface to trellis keypads
 matrix0 = Adafruit_Trellis.Adafruit_Trellis()
-keypad = Adafruit_Trellis.Adafruit_TrellisSet(matrix0)
+matrix1 = Adafruit_Trellis.Adafruit_Trellis()
+keypad = Adafruit_Trellis.Adafruit_TrellisSet(matrix0, matrix1)
 I2C_BUS = 1
-numPads = 1
+numPads = 2
 numKeys = numPads * 16
-keypad.begin((0x70, I2C_BUS))
-#keypad.begin((0x70, I2C_BUS), (0x71, I2C_BUS))
+#keypad.begin((0x70, I2C_BUS))
+keypad.begin((0x70, I2C_BUS), (0x71, I2C_BUS))
 
 
 
@@ -95,13 +96,25 @@ def main():
 	# each button's number is the index into the arrays to get it's data
 	#y = [2, 5, 8, 11, 14, 16, 19, 22, 25, 2, 5, 8, 11, 14, 16, 19, 22, 25]
 	#x = [9, 7, 5, 3, 3, 5, 7, 9, 23, 25, 27, 29, 29, 27, 25, 23]
-	px = [8, 7, 6, 6, 5, 4, 4, 3, 3, 4, 4, 5, 6, 6, 7, 8]
-	py = [3, 4, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21, 22, 23, 24]
-	vxmin = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-	vxmax = [4, 4, 4, 4, 4, 4, 4, 4 ,4, 4, 4, 4, 4, 4, 4, 4]
-	vymin = [0, 0, 0, 0, 0, 0, 0, 0, -3, -3, -3, -3, -3, -3, -3, -3]
-	vymax = [3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0] 
+	px = [8, 7, 6, 6, 5, 4, 4, 3, 3, 4, 4, 5, 6, 6, 7, 8,\
+		  23, 24, 25, 25, 26, 27, 27, 28, 28, 27, 27, 26, 25, 25, 24, 23]
+	py = [3, 4, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21, 22, 23, 24,\
+		  3, 4, 5, 6, 7, 8, 9, 10, 17, 18, 19, 20, 21, 22, 23, 24]
+	vxmin = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,\
+			 -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4]
+	vxmax = [4, 4, 4, 4, 4, 4, 4, 4 ,4, 4, 4, 4, 4, 4, 4, 4,\
+			 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,]
+	vymin = [0, 0, 0, 0, 0, 0, 0, 0, -3, -3, -3, -3, -3, -3, -3, -3,\
+			 0, 0, 0, 0, 0, 0, 0, 0, -3, -3, -3, -3, -3, -3, -3, -3]
+	vymax = [3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0,\
+			 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
 
+
+	# light LEDs on keypads
+	for i in range(numKeys):
+		keypad.setLED(i)
+	keypad.writeDisplay()
+	
 	with panel_lock:
 		panel.clear_strip()
 		panel.show()	
@@ -127,7 +140,7 @@ def main():
 							pulse_list.add_pulse(px[i], py[i],\
 								np.random.randint(vxmin[i], vxmax[i]),\
 								np.random.randint(vymin[i], vymax[i]),\
-								(i * 15), (255 - (i * 15)), ((i % 4) * 20))	
+								((i * 15)%255), (255 - ((i * 15)%255)), (((i % 4) * 20) %255))	
 
 	except KeyboardInterrupt:
 		print(" KB Int")
@@ -137,7 +150,9 @@ def main():
 		panel.clear_strip()
 		panel.cleanup()
 
-		
+		for i in range(numKeys):
+			keypad.clrLED(i)
+		keypad.writeDisplay()
 
 if __name__ == "__main__":
 	main()
